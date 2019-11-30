@@ -39,7 +39,8 @@ function getSendMessage() {
 
 function getEhimeEventsText() {
   const events = getCalendarEvents();
-  const ehimeEvents = events.filter(isEhime);
+  var ehimeEvents = events.filter(isEhime);
+  ehimeEvents = ehimeEvents.filter(isEhimeTitle);
   return getEventsText(ehimeEvents);
 }
 
@@ -58,6 +59,12 @@ function isEhime(event) {
   // 下記定義の対象を除外したものを全て拾うことで、場所未設定の情報も含め多めにイベント情報を拾っている。
   const IGNORE_LOCATION_REGEXP = /(こうち|高知|とくしま|徳島|かがわ|香川)/i;
   return !IGNORE_LOCATION_REGEXP.exec(event.getLocation());
+}
+
+function isEhimeTitle(event) {
+  // タイトルに「こうち|高知|とくしま|徳島|かがわ|香川」を含むイベントを除外
+  const IGNORE_LOCATION_REGEXP = /(こうち|高知|とくしま|徳島|かがわ|香川)/i;
+  return !IGNORE_LOCATION_REGEXP.exec(event.getTitle());
 }
 
 function getEventsText(events) {
