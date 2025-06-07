@@ -19,7 +19,7 @@ const SCRIPT_PROPERTIES_KEYS = ['slackHookUrl', 'slackChannel', 'slackUsername',
 // 取得情報から除外する場所キーワード
 const IGNORE_LOCATION_REGEXP = /(こうち|高知|とくしま|徳島|かがわ|香川)/i;
 // 週(数値)を文字列に変換するためだけの配列
-const WEEK_LIST = ['日', '月', '火', '水', '木', '金', '土'];
+const WEEK_LIST = ['', '月', '火', '水', '木', '金', '土', '日'];
 
 class SlackNotifier {
   constructor({ slackHookUrl, slackChannel, slackUsername, slackIconEmoji }) {
