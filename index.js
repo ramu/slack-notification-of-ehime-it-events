@@ -108,7 +108,7 @@ function getEventsText(events) {
 function getEventText(event) {
   var eventText = "```";
   eventText += Utilities.formatDate(event.getStartTime(),'GMT+0900', 'yyyy/MM/dd');
-  eventText += '(' + WEEK_LIST[Utilities.formatDate(event.getStartTime(), 'JST', 'u')] + ')  ';
+  eventText += '(' + WEEK_LIST[Utilities.formatDate(event.getStartTime(), 'GMT+0900', 'u')] + ')  ';
   if (!event.isAllDayEvent()) {
     eventText += Utilities.formatDate(event.getStartTime(), 'GMT+0900', 'HH:mm');
     eventText += Utilities.formatDate(event.getEndTime(), 'GMT+0900', '-HH:mm  ');
