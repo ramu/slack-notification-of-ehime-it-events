@@ -9,6 +9,12 @@
 //     - slackUsername: 通知ユーザ名
 //     - slackIconEmoji: 通知ユーザアイコン(絵文字で指定してください。例えば :chipmunk: )
 
+const GOOGLE_CALENDAR_ID = '38cm4t8if4qqupb6g7vbd0jna0@group.calendar.google.com';
+const ACQUISITION_INTERVAL = 14; // 現在から何日後までのイベント情報を取得するか(日数)
+const SCRIPT_PROPERTIES_KEYS = ['slackHookUrl', 'slackChannel', 'slackUsername', 'slackIconEmoji'];
+const IGNORE_LOCATION_REGEXP = /(こうち|高知|とくしま|徳島|かがわ|香川)/i;
+const WEEK_LIST = ['日', '月', '火', '水', '木', '金', '土', '日'];
+
 class SlackNotifier {
   constructor({ slackHookUrl, slackChannel, slackUsername, slackIconEmoji }) {
     this.slackHookUrl = slackHookUrl;
@@ -45,8 +51,7 @@ function main() {
 
 function getScriptProperties() {
   const scriptProperties = {};
-  const scriptPropertiesKeys = ['slackHookUrl', 'slackChannel', 'slackUsername', 'slackIconEmoji'];
-  for (const key of scriptPropertiesKeys) {
+  for (const key of SCRIPT_PROPERTIES_KEYS) {
     scriptProperties[key] = PropertiesService.getScriptProperties().getProperty(key);
     if (!scriptProperties[key]) {
       Logger.log('[ERROR]' + key + ' is not set.');
@@ -70,25 +75,22 @@ function getEhimeEventsText() {
 }
 
 function getCalendarEvents() {
-  const ACQUISITION_INTERVAL = 14; // イベント情報取得日数
   const today = new Date();
   const lastday = new Date();
   lastday.setDate(today.getDate() + ACQUISITION_INTERVAL);
 
-  const calendar = CalendarApp.getCalendarById('38cm4t8if4qqupb6g7vbd0jna0@group.calendar.google.com');
+  const calendar = CalendarApp.getCalendarById(GOOGLE_CALENDAR_ID);
   return calendar.getEvents(today, lastday);
 }
 
 function isEhime(event) {
-  // 「愛媛」や「松山」で絞り込んで情報取得すると ノイズが多すぎる ＆ 場所情報が未設定 の場合に拾えない。
+  //  「愛媛」や「松山」で絞り込んで情報取得すると ノイズが多すぎる ＆ 場所情報が未設定 の場合に拾えない。
   // 下記定義の対象を除外したものを全て拾うことで、場所未設定の情報も含め多めにイベント情報を拾っている。
-  const IGNORE_LOCATION_REGEXP = /(こうち|高知|とくしま|徳島|かがわ|香川)/i;
   return !IGNORE_LOCATION_REGEXP.exec(event.getLocation());
 }
 
 function isEhimeTitle(event) {
   // タイトルに「こうち|高知|とくしま|徳島|かがわ|香川」を含むイベントを除外
-  const IGNORE_LOCATION_REGEXP = /(こうち|高知|とくしま|徳島|かがわ|香川)/i;
   return !IGNORE_LOCATION_REGEXP.exec(event.getTitle());
 }
 
@@ -99,8 +101,6 @@ function getEventsText(events) {
 }
 
 function getEventText(event) {
-  const WEEK_LIST = new Array('日', '月', '火', '水', '木', '金', '土', '日');
-
   var eventText = "```";
   eventText += Utilities.formatDate(event.getStartTime(),'GMT+0900', 'yyyy/MM/dd');
   eventText += '(' + WEEK_LIST[Utilities.formatDate(event.getStartTime(), 'JST', 'u')] + ')  ';
