@@ -44,14 +44,15 @@ function main() {
 }
 
 function getScriptProperties() {
-  const scriptProperties = new Object();
-  ['slackHookUrl', 'slackChannel', 'slackUsername', 'slackIconEmoji'].forEach(function (targetPropertyKey) {
-    scriptProperties[targetPropertyKey] = PropertiesService.getScriptProperties().getProperty(targetPropertyKey);
-    if (!scriptProperties[targetPropertyKey]) {
-      Logger.log('[ERROR]' + targetPropertyKey + ' is not set.');
+  const scriptProperties = {};
+  const scriptPropertiesKeys = ['slackHookUrl', 'slackChannel', 'slackUsername', 'slackIconEmoji'];
+  for (const key of scriptPropertiesKeys) {
+    scriptProperties[key] = PropertiesService.getScriptProperties().getProperty(key);
+    if (!scriptProperties[key]) {
+      Logger.log('[ERROR]' + key + ' is not set.');
       return null;
     }
-  });
+  }
   return scriptProperties;
 }
 
