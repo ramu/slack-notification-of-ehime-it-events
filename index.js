@@ -9,10 +9,16 @@
 //     - slackUsername: 通知ユーザ名
 //     - slackIconEmoji: 通知ユーザアイコン(絵文字で指定してください。例えば :chipmunk: )
 
+// 【設定】
+// 取得対象の Google カレンダーID(今のところ固定だけど念の為定数化)
 const GOOGLE_CALENDAR_ID = '38cm4t8if4qqupb6g7vbd0jna0@group.calendar.google.com';
-const ACQUISITION_INTERVAL = 14; // 現在から何日後までのイベント情報を取得するか(日数)
+// 現在から何日後までのイベント情報を取得するか(日数)
+const ACQUISITION_INTERVAL = 14;
+// スクリプトプロパティから取得する対象key
 const SCRIPT_PROPERTIES_KEYS = ['slackHookUrl', 'slackChannel', 'slackUsername', 'slackIconEmoji'];
+// 取得情報から除外する場所キーワード
 const IGNORE_LOCATION_REGEXP = /(こうち|高知|とくしま|徳島|かがわ|香川)/i;
+// 週(数値)を文字列に変換するためだけの配列
 const WEEK_LIST = ['日', '月', '火', '水', '木', '金', '土', '日'];
 
 class SlackNotifier {
@@ -69,6 +75,8 @@ function getSendMessage() {
 
 function getEhimeEventsText() {
   const events = getCalendarEvents();
+  // カレンダーから取得した情報に対して「愛媛」や「松山」で絞り込むと ノイズが多すぎる ＆ 場所情報が未設定 の場合に拾えない。
+  // 「愛媛」や「松山」で絞り込むのではなく、それ以外のキーワードで除外することで、場所未設定の情報も含め多めにイベント情報を拾っている。
   var ehimeEvents = events.filter(isEhime);
   ehimeEvents = ehimeEvents.filter(isEhimeTitle);
   return getEventsText(ehimeEvents);
@@ -84,13 +92,10 @@ function getCalendarEvents() {
 }
 
 function isEhime(event) {
-  //  「愛媛」や「松山」で絞り込んで情報取得すると ノイズが多すぎる ＆ 場所情報が未設定 の場合に拾えない。
-  // 下記定義の対象を除外したものを全て拾うことで、場所未設定の情報も含め多めにイベント情報を拾っている。
   return !IGNORE_LOCATION_REGEXP.exec(event.getLocation());
 }
 
 function isEhimeTitle(event) {
-  // タイトルに「こうち|高知|とくしま|徳島|かがわ|香川」を含むイベントを除外
   return !IGNORE_LOCATION_REGEXP.exec(event.getTitle());
 }
 
@@ -120,7 +125,7 @@ function getEventText(event) {
 }
 
 function formatEventDescription(description) {
-  // &nbsp; を除去
+  // 本文の &nbsp; がそのまま Slack 上に表示されてしまうので除去
   description = description.replace(/&nbsp;/g, '');
   const matchedData = description.match(/<a[^>]*>(\S*)<\/[^>]*>/);
   if (matchedData && matchedData[1]) {
