@@ -112,7 +112,9 @@ function getEventText(event) {
   if (event.getDescription()) {
     eventText += formatEventDescription(event.getDescription());
   }
-  eventText += "\n```\n";
+  // 末尾の改行を1つだけにしてから ``` を追加
+  eventText = eventText.replace(/\n+$/, '\n');
+  eventText += "```\n";
   Logger.log(eventText);
   return eventText;
 }
