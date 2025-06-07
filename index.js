@@ -9,6 +9,29 @@
 //     - slackUsername: 通知ユーザ名
 //     - slackIconEmoji: 通知ユーザアイコン(絵文字で指定してください。例えば :chipmunk: )
 
+class SlackNotifier {
+  constructor({ slackHookUrl, slackChannel, slackUsername, slackIconEmoji }) {
+    this.slackHookUrl = slackHookUrl;
+    this.slackChannel = slackChannel;
+    this.slackUsername = slackUsername;
+    this.slackIconEmoji = slackIconEmoji;
+  }
+
+  send(text) {
+    const payload = {
+      'text': text,
+      'channel': this.slackChannel,
+      'username': this.slackUsername,
+      'icon_emoji': this.slackIconEmoji
+    };
+    const params = {
+      'method': 'POST',
+      'payload': JSON.stringify(payload)
+    };
+    UrlFetchApp.fetch(this.slackHookUrl, params);
+  }
+}
+
 function main() {
   const scriptProperties = getScriptProperties();
   if (!scriptProperties) {
@@ -16,7 +39,8 @@ function main() {
   }
   const sendMessage = getSendMessage();
 
-  postSlack(sendMessage, scriptProperties);
+  const notifier = new SlackNotifier(scriptProperties);
+  notifier.send(sendMessage);
 }
 
 function getScriptProperties() {
@@ -109,18 +133,4 @@ function getHeaderText(eventsExists) {
   headerText += "■四国方面 IT勉強会と非 IT系の合わせ技カレンダー（仮称\n";
   headerText += "https://sites.google.com/site/itandothershikoku/\n";
   return headerText;
-}
-
-function postSlack(text, scriptProperties) {
-  const payload = {
-    'text' : text,
-    'channel' : scriptProperties.slackChannel,
-    'username' : scriptProperties.slackUsername,
-    'icon_emoji' : scriptProperties.slackIconEmoji
-  }
-  const params = {
-    'method' : 'POST',
-    'payload' : JSON.stringify(payload)
-  }
-  UrlFetchApp.fetch(scriptProperties.slackHookUrl, params);
 }
