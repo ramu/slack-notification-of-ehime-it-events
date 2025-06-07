@@ -120,11 +120,13 @@ function getEventText(event) {
 }
 
 function formatEventDescription(description) {
+  // &nbsp; を除去
+  description = description.replace(/&nbsp;/g, '');
   const matchedData = description.match(/<a[^>]*>(\S*)<\/[^>]*>/);
   if (matchedData && matchedData[1]) {
     return matchedData[1];
   }
-  return description
+  return description;
 }
 
 function getHeaderText(eventsExists) {
