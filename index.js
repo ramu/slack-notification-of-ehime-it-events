@@ -134,6 +134,7 @@ function getHeaderText(eventsExists) {
     '今後2週間の愛媛県内のイベントをお知らせします(誤検出あり)',
     '\n',
     '以下の内容は <https://sites.google.com/site/itandothershikoku/|四国方面 IT勉強会と非 IT系の合わせ技カレンダー（仮称> から抜粋しています。',
+    '抽出条件など実装を確認・変更依頼したい場合は <https://github.com/ramu/slack-notification-of-ehime-it-events|GitHub> にお願いします。',
     '\n',
   ].join('\n');
 }
