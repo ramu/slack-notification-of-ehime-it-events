@@ -22,8 +22,9 @@ const IGNORE_LOCATION_REGEXP = /(こうち|高知|とくしま|徳島|かがわ|
 const WEEK_LIST = ['', '月', '火', '水', '木', '金', '土', '日'];
 
 class SlackNotifier {
-  constructor({ slackHookUrl, slackChannel, slackUsername, slackIconEmoji }) {
-    Object.assign(this, { slackHookUrl, slackChannel, slackUsername, slackIconEmoji });
+  // props: { slackHookUrl:, slackChannel:, slackUsername:, slackIconEmoji: }
+  constructor(props) {
+    Object.assign(this, props);
   }
 
   send(text) {
@@ -84,9 +85,7 @@ function getEhimeEventsText() {
   const events = getCalendarEvents();
   // カレンダーから取得した情報に対して「愛媛」や「松山」で絞り込むと ノイズが多すぎる ＆ 場所情報が未設定 の場合に拾えない。
   // 「愛媛」や「松山」で絞り込むのではなく、それ以外のキーワードで除外することで、場所未設定の情報も含め多めにイベント情報を拾っている。
-  let ehimeEvents = events.filter(isEhimeLocation);
-  ehimeEvents = ehimeEvents.filter(isEhimeTitle);
-  return getEventsText(ehimeEvents);
+  return getEventsText(events.filter(e => isEhimeLocation(e) && isEhimeTitle(e)));
 }
 
 function getCalendarEvents() {
@@ -133,10 +132,7 @@ function formatEventDescription(description) {
   // 本文の &nbsp; がそのまま Slack 上に表示されてしまうので除去
   description = description.replace(/&nbsp;/g, '');
   const matchedData = description.match(/<a[^>]*>(\S*)<\/[^>]*>/);
-  if (matchedData && matchedData[1]) {
-    return matchedData[1];
-  }
-  return description;
+  return matchedData?.[1] || description;
 }
 
 function getHeaderText(eventsExists) {
@@ -144,11 +140,10 @@ function getHeaderText(eventsExists) {
     return "今後2週間の愛媛県内のイベント情報はありませんでした。\n";
   }
 
-  return [
-    '今後2週間の愛媛県内のイベントをお知らせします(誤検出あり)',
-    '\n',
-    '以下の内容は <https://sites.google.com/site/itandothershikoku/|四国方面 IT勉強会と非 IT系の合わせ技カレンダー（仮称> から抜粋しています。',
-    '抽出条件など実装を確認・変更依頼したい場合は <https://github.com/ramu/slack-notification-of-ehime-it-events|GitHub> にお願いします。',
-    '\n',
-  ].join('\n');
+  return `今後2週間の愛媛県内のイベントをお知らせします(誤検出あり)
+
+以下の内容は <https://sites.google.com/site/itandothershikoku/|四国方面 IT勉強会と非 IT系の合わせ技カレンダー（仮称> から抜粋しています。
+抽出条件など実装を確認・変更依頼したい場合は <https://github.com/ramu/slack-notification-of-ehime-it-events|GitHub> にお願いします。
+
+`;
 }
