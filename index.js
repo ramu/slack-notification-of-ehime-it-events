@@ -77,7 +77,7 @@ function getEhimeEventsText() {
   const events = getCalendarEvents();
   // カレンダーから取得した情報に対して「愛媛」や「松山」で絞り込むと ノイズが多すぎる ＆ 場所情報が未設定 の場合に拾えない。
   // 「愛媛」や「松山」で絞り込むのではなく、それ以外のキーワードで除外することで、場所未設定の情報も含め多めにイベント情報を拾っている。
-  var ehimeEvents = events.filter(isEhime);
+  var ehimeEvents = events.filter(isEhimeLocation);
   ehimeEvents = ehimeEvents.filter(isEhimeTitle);
   return getEventsText(ehimeEvents);
 }
@@ -91,7 +91,7 @@ function getCalendarEvents() {
   return calendar.getEvents(today, lastday);
 }
 
-function isEhime(event) {
+function isEhimeLocation(event) {
   return !IGNORE_LOCATION_REGEXP.exec(event.getLocation());
 }
 
