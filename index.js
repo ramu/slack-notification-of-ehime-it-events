@@ -133,8 +133,7 @@ function getHeaderText(eventsExists) {
   return [
     '今後2週間の愛媛県内のイベントをお知らせします(誤検出あり)',
     '\n',
-    '■四国方面 IT勉強会と非 IT系の合わせ技カレンダー（仮称',
-    'https://sites.google.com/site/itandothershikoku/',
+    '以下の内容は <https://sites.google.com/site/itandothershikoku/|四国方面 IT勉強会と非 IT系の合わせ技カレンダー（仮称> から抜粋しています。',
     '\n',
   ].join('\n');
 }
