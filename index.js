@@ -23,10 +23,7 @@ const WEEK_LIST = ['', '月', '火', '水', '木', '金', '土', '日'];
 
 class SlackNotifier {
   constructor({ slackHookUrl, slackChannel, slackUsername, slackIconEmoji }) {
-    this.slackHookUrl = slackHookUrl;
-    this.slackChannel = slackChannel;
-    this.slackUsername = slackUsername;
-    this.slackIconEmoji = slackIconEmoji;
+    Object.assign(this, { slackHookUrl, slackChannel, slackUsername, slackIconEmoji });
   }
 
   send(text) {
@@ -47,22 +44,18 @@ class SlackNotifier {
 class ScriptPropertiesManager {
   constructor(keys) {
     this.keys = keys;
-    this.properties = {};
-    this.loadProperties();
-  }
-  loadProperties() {
-    for (const key of this.keys) {
-      this.properties[key] = PropertiesService.getScriptProperties().getProperty(key);
-    }
+    this.properties = Object.fromEntries(
+      keys.map(key => [key, PropertiesService.getScriptProperties().getProperty(key)])
+    );
   }
   isValid() {
-    for (const key of this.keys) {
+    return this.keys.every(key => {
       if (!this.properties[key]) {
         Logger.log('[ERROR]' + key + ' is not set.');
         return false;
       }
-    }
-    return true;
+      return true;
+    });
   }
   getProperties() {
     return this.properties;
@@ -91,7 +84,7 @@ function getEhimeEventsText() {
   const events = getCalendarEvents();
   // カレンダーから取得した情報に対して「愛媛」や「松山」で絞り込むと ノイズが多すぎる ＆ 場所情報が未設定 の場合に拾えない。
   // 「愛媛」や「松山」で絞り込むのではなく、それ以外のキーワードで除外することで、場所未設定の情報も含め多めにイベント情報を拾っている。
-  var ehimeEvents = events.filter(isEhimeLocation);
+  let ehimeEvents = events.filter(isEhimeLocation);
   ehimeEvents = ehimeEvents.filter(isEhimeTitle);
   return getEventsText(ehimeEvents);
 }
@@ -114,13 +107,11 @@ function isEhimeTitle(event) {
 }
 
 function getEventsText(events) {
-  return events.map(function(event) {
-    return getEventText(event);
-  }).join('');
+  return events.map(getEventText).join('');
 }
 
 function getEventText(event) {
-  var eventText = "```";
+  let eventText = "```";
   eventText += Utilities.formatDate(event.getStartTime(),'GMT+0900', 'yyyy/MM/dd');
   eventText += '(' + WEEK_LIST[Utilities.formatDate(event.getStartTime(), 'GMT+0900', 'u')] + ')  ';
   if (!event.isAllDayEvent()) {
