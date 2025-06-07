@@ -44,27 +44,41 @@ class SlackNotifier {
   }
 }
 
+class ScriptPropertiesManager {
+  constructor(keys) {
+    this.keys = keys;
+    this.properties = {};
+    this.loadProperties();
+  }
+  loadProperties() {
+    for (const key of this.keys) {
+      this.properties[key] = PropertiesService.getScriptProperties().getProperty(key);
+    }
+  }
+  isValid() {
+    for (const key of this.keys) {
+      if (!this.properties[key]) {
+        Logger.log('[ERROR]' + key + ' is not set.');
+        return false;
+      }
+    }
+    return true;
+  }
+  getProperties() {
+    return this.properties;
+  }
+}
+
 function main() {
-  const scriptProperties = getScriptProperties();
-  if (!scriptProperties) {
+  const propManager = new ScriptPropertiesManager(SCRIPT_PROPERTIES_KEYS);
+  if (!propManager.isValid()) {
     return;
   }
+  const scriptProperties = propManager.getProperties();
   const sendMessage = getSendMessage();
 
   const notifier = new SlackNotifier(scriptProperties);
   notifier.send(sendMessage);
-}
-
-function getScriptProperties() {
-  const scriptProperties = {};
-  for (const key of SCRIPT_PROPERTIES_KEYS) {
-    scriptProperties[key] = PropertiesService.getScriptProperties().getProperty(key);
-    if (!scriptProperties[key]) {
-      Logger.log('[ERROR]' + key + ' is not set.');
-      return null;
-    }
-  }
-  return scriptProperties;
 }
 
 function getSendMessage() {
